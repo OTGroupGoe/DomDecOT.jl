@@ -29,28 +29,42 @@ Random.seed!(0)
     c = MOT.l22
     C = [c(x,y) for y in eachcol(X), x in eachcol(Y)]
     ε = N/10
+    K = copy(C)
 
-    # Solve first time scaling the kernel with νJ .* μ'
-    K1 = DD.get_kernel(C, 0, 0, νJ, μ, ε)
+    a = zeros(N)
+    b = zeros(N)
+    kwargs = (; max_error = 1e-10, max_iter = 10000)
+    DD.domdec_sinkhorn_stabilized!(b, a, νJ, ν, μ, K, ε; kwargs...)
 
-    a1 = zeros(N)
-    b1 = zeros(N)
-
-    MOT.sinkhorn_stabilized!(b1, a1, νJ, μ, K1, ε)  
-    
-    # Solve second time with dedicated domdec solver, 
-    # which scales the kernel with ν .* μ'
-    K2 = copy(C)
-
-    a2 = zeros(N)
-    b2 = zeros(N)
-    DD.domdec_sinkhorn_stabilized!(b2, a2, νJ, ν, μ, K2, ε)
-
-    # Transport cost must agree
-    @test dot(K1, C) ≈ dot(K2, C)
-    # <μ, α> must agree
-    @test dot(μ, a1) ≈ dot(μ, a2)
     # <νJ, β> must agree, where each β must be adjusted by the 
     # difference in their kernel scaling
-    @test dot(νJ, b1.+ ε.*log.(νJ)) ≈ dot(νJ, b2 .+ ε.*log.(ν))
+    b .+= ε.*log.(ν./νJ) 
+    gap = MOT.PD_gap_dense(b, a, K, c, Y, X, νJ, μ, ε)
+    @test abs(gap) <1e-8
+end
+
+@testset ExtendedTestSet "domdec-sinkhorn-autofix" begin
+    # This should converge even for very small values of ε
+    N = 8
+    cellsize = 1
+    x1 = collect(1:N)
+    X = MOT.flat_grid(x1)
+    Y = MOT.flat_grid(x1)
+    μ = rand(N) .+ 1e-2; normalize!(μ)
+    ν = rand(N) .+ 1e-2; normalize!(ν)
+    # Dummy cell Y-marginal
+    νJ = rand(N)
+    normalize!(μ, sum(νJ))
+
+    c = MOT.l22
+    C = [c(x,y) for y in eachcol(X), x in eachcol(Y)]
+    K = copy(C)
+
+    a = zeros(N)
+    b = zeros(N)
+    DD.domdec_sinkhorn_autofix!(b, a, νJ, ν, μ, K, ε; verbose = true)
+
+    # scaling used in MOT is different, adjust
+    b .+= ε.*log.(ν./νJ) 
+    @test MOT.PD_gap_dense(b, a, K, c, Y, X, νJ, μ, ε)
 end
