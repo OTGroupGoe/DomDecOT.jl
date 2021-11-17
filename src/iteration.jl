@@ -5,7 +5,6 @@
 ##############################
 
 function iterate!(P, c, _iterate!, solver, params)
-
     Npart = length(P.composite_cells)
     P.epsilon = params[:epsilon]
     for k in params[:iters]
@@ -23,13 +22,13 @@ optimal transport (https://arxiv.org/abs/2001.10986) on plan `P`, with cost `c`,
 regularization `eps`, on the `composite_partitions` and with a certain
 `solver`.
 """
-function iterate_serial!(P, k, c, solver, params)
+function iterate_serial!(P, k::Int, c, solver, params)
     for j in eachindex(P.composite_cells[k])
         solvecell!(P, k, j, c, solver, params)
     end
 end
 
-function iterate_parallel!(P, k, c, solver, params)
+function iterate_parallel!(P, k::Int, c, solver, params)
     Threads.@threads for j in eachindex(P.composite_cells[k])
         solvecell!(P, k, j, c, solver, params)
     end
@@ -55,10 +54,11 @@ function solvecell!(P::DomDecPlan, k, j, c, solver, params)
     # β can have the wrong size after initialization or 
     # an alternated iteration. So we must be sure that 
     # it has the correct length
-    fix_beta!(β, length(I))
-
+    #fix_beta!(β, length(I))
+    ε = params[:epsilon]
+    fix_beta!(β, α, K, νJ, νI, μJ, ε) 
     # Solve the cell subproblem
-    status = solver(β, α, νJ, νI, μJ, K, params[:epsilon];
+    status = solver(β, α, νJ, νI, μJ, K, ε;
                     max_iter = params[:solver_max_iter],
                     max_error = params[:solver_max_error],
                     max_error_rel = params[:solver_max_error_rel],

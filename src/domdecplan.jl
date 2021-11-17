@@ -10,6 +10,8 @@ Super type of all implementations of OT plans.
 """
 abstract type AbstractPlan{D} end
 
+# This should inherit from AbstractPlan, but we are still to find 
+# the appropriate type signature to make it as well type stable.
 mutable struct DomDecPlan{M<:AbstractMeasure, N<:AbstractMeasure}
     mu::M # X measure 
     nu::N # Y measure 
@@ -23,6 +25,35 @@ mutable struct DomDecPlan{M<:AbstractMeasure, N<:AbstractMeasure}
     epsilon::Float64 # epsilon for which alphas, betas are dual cell potentials
     partk::Int     # Current iterate
     
+
+    """
+        DomDecPlan(mu::AbstractMeasure{D}, nu::AbstractMeasure, gamma,
+                    cellsize::Int[, basic_cells::Vector, 
+                    composite_cells::Vector, partitions::Vector,
+                    alphas::Vector, betas::Vector, 
+                    epsilon=1.0, partk=1; 
+                    consistency_check = true])
+
+    A DomDecPlan is a struct that keeps track of the status of the 
+    domain decomposition algorithm in an effient manner. Its arguments are
+
+    * `mu`: AbstractMeasure representing the X marginal
+    * `nu`: AbstractMeasure representing the Y marginal
+    * `gamma`: `gamma[i]` is a sparse vector representing the current marginal
+      of basic cell `i`.
+    * `cellsize::Int`: maximum size of the basic cells (along all dimensions).
+    * `basic_cells`: `basic_cells[i]` is the indices of the atoms in `mu` that
+      are merged together to form a basic cell. 
+    * `composite_cells`: `composite_cells[k][j]` refers to the group of basic cells
+      that constitute the `j`-th subdomain of the `k`-th partition.
+    * `partitions`: `partitions[k][j]` are the indices of all the `X` atoms that constitute the 
+      first marginal during `j`-th subdomain of partition `k`. It equals 
+      `vcat([basic_cells[composite_cells[k][j]]...)`
+    * `alphas`: X-dual potential on each subdomain. `alphas[k][j]` has the same length as `partitions[k][j]`.
+    * `betas`: Y-dual potentials on each subdomain.
+    * `epsilon`: last global epsilon used to solve the cell problems.
+    * `partk`: index of the last partition whose subdomains were solved.
+    """
     function DomDecPlan(mu::AbstractMeasure{D}, 
                         nu::AbstractMeasure, 
                         gamma,
@@ -182,7 +213,7 @@ function get_cell_plan(P::DomDecPlan, c, k, j, balancing = true, truncation = 1e
     α = get_cell_alpha(P, k, j)
     β = get_cell_beta(P, k, j)
     C = get_cell_cost_matrix(P, c, k, j, I)
-    fix_beta!(β, α, C, νJ, νI, μJ, P.epsilon, true)
+    fix_beta!(β, α, C, νJ, νI, μJ, P.epsilon)
     ε = P.epsilon
     # Rename C for code clarity
     K = C

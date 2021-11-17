@@ -22,20 +22,34 @@ function fix_beta!(β, N::Int)
     return true
 end
 
-function fix_beta!(β, α, K, νJ, νI, μJ, ε, K_is_cost = false)
-    M, N = size(K)
+"""
+    fix_beta!(β, N::Int)
+
+Check if the Y-dual parameter has length `size(C, 1)`. If not, turns it 
+into the dual conjugate of `α` with the appropriate parameters.
+Return `true` if β was of the appropriate length, `false` otherwise
+"""
+function fix_beta!(β, α, C, νJ, νI, μJ, ε)
+    M, N = size(C)
     was_alright = fix_beta!(β, M)
     if !was_alright
-        if K_is_cost
-            get_kernel!(K, β, α, νI, μJ, ε)
-        end
+        K = get_kernel(C, β, α, νI, μJ, ε)
         mul!(β, K, ones(N))
         # Now we do β .= νJ ./ β; β .= ε .* log.(β)
         # Which can be sumarized as
         β .= ε .* log.(νJ ./ β)
+        if MOT.isthere_nan_or_inf(β)
+            # Entries of K were too big; do computation in log-domain
+            C2 = copy(C)
+            C2 .-= ε .* log.(μJ')
+            C2 .-= ε .* log.(νI)
+            β .= ε .* log.(νJ) .+ MOT.logsumexp(C2, α, ε, 1)
+        end
     end
     return was_alright
 end
+
+# TODO: send all these get_kernel only to MOT
 
 """
     get_kernel!(C, a, b, μ, ν, eps)

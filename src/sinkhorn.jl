@@ -3,7 +3,7 @@
 using StatsBase: mean
 using SparseArrays
 import MultiScaleOT as MOT
-import MultiScaleOT: sinkhorn!, sinkhorn_stabilized!
+import MultiScaleOT: sinkhorn!, sinkhorn_stabilized!, log_sinkhorn!
 
 """
     domdec_sinkhorn_stabilized!(β, α, νJ, νI, μJ, C, ε; kwargs...)
@@ -95,4 +95,42 @@ function domdec_sinkhorn_autofix!(β, α, νJ, νI, μJ, C, ε;
 end
 
 # TODO: provide sparsesinkhorn 
-# TODO: provide log-sinkhorn
+
+# TODO: document
+function domdec_logsinkhorn!(β, α, νJ, νI, μJ, C, ε; 
+            max_iter = 1000, max_error = 1e-8, 
+            max_error_rel=true, verbose = true)
+    # Rename cost to K for code clarity
+
+    # C already has the marginals incorported incorporated
+    C .-= ε.*log.(μJ') 
+    C .-= ε.*log.(νI)
+    status = log_sinkhorn!(β, α, νJ, μJ, C, ε; 
+            max_iter, max_error, max_error_rel, verbose)
+    # After this C is already scaled to be the plan
+    return status
+end    
+
+# TODO: document
+function domdec_autofix_log!(β, α, νJ, νI, μJ, C, ε; 
+            max_iter = 1000, max_error = 1e-8, 
+            max_error_rel=true, verbose = true)
+    # Rename cost to K for code clarity
+    K = copy(C)
+    α2 = copy(α)
+    β2 = copy(β)
+    get_kernel!(K, β, α, νI, μJ, ε)
+
+    status = sinkhorn_stabilized!(β2, α2, νJ, μJ, K, ε; 
+                max_iter, max_error, max_error_rel, verbose)
+
+    if status != 2
+        β .= β2
+        α .= α2
+        C .= K
+        return status
+    else
+        return domdec_logsinkhorn!(β, α, νJ, νI, μJ, C, ε; 
+                    max_iter, max_error, max_error_rel, verbose)
+    end
+end

@@ -1,3 +1,4 @@
+# CODE STATUS: MOSTLY TESTED, REVISED
 import LinearAlgebra: dot
 # TODO: get_discrete_gradient in MultiScaleOT or here?
 import MultiScaleOT: get_discrete_gradient
@@ -83,7 +84,6 @@ function get_alpha_graph(P::DomDecPlan{GridMeasure{1}, M}, alpha_diff) where M
 end
 
 # TODO: generalize to arbitrary dimension
-# TODO: cellsize probably should go inside DomDecPlan
 """
     get_alpha_graph(P::DomDecPlan{2}, alpha_diff)
    
@@ -162,8 +162,8 @@ end
 """
     smooth_alpha_field(P::DomDecPlan, cellsize)
 
-Compute a smooth version of the duals of `P` by performing a 
-Helmholtz decomposition.
+Compute a smooth version of the `X` dual of `P` by performing a 
+Helmholtz decomposition (see https://arxiv.org/abs/2001.10986 for details)
 """
 function smooth_alpha_field(P::DomDecPlan{GridMeasure{D}, M}) where {D,M}
     # TODO: this right now allocates too much, go for simple subtraction
@@ -179,6 +179,13 @@ function smooth_alpha_field(P::DomDecPlan{GridMeasure{D}, M}) where {D,M}
     return alpha_field
 end
 
+"""
+    smooth_alpha_and_beta_field(P::DomDecPlan, cellsize)
+
+Compute a smooth version of the duals of `P` by performing a 
+Helmholtz decomposition on `X` and adapting the dual in `Y`
+accordingly.
+"""
 function smooth_alpha_and_beta_fields(P::DomDecPlan{GridMeasure{D}, M}, c) where {D,M}
     alpha_field = get_alpha_field(P, 1)
     alpha_diff = alpha_field .- get_alpha_field(P, 2)
@@ -202,10 +209,10 @@ function smooth_alpha_and_beta_fields(P::DomDecPlan{GridMeasure{D}, M}, c) where
         # If βJ is broken, we need more data to fix it
         if length(βJ) != length(I)
             αJ = get_cell_alpha(P, k0, i)
-            K = get_cell_cost_matrix(P, c, J, I)
+            C = get_cell_cost_matrix(P, c, J, I)
             μJ = view_X_marginal(P, J)
             ε = P.epsilon
-            fix_beta!(βJ, αJ, K, νJ, νI, μJ, ε, true)
+            fix_beta!(βJ, αJ, C, νJ, νI, μJ, ε)
         end
 
         beta_field[I] .+= (V[i] .+ βJ).* (νJ./νI) 
