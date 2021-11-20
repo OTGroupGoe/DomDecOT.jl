@@ -180,7 +180,7 @@ function smooth_alpha_field(P::DomDecPlan{GridMeasure{D}, M}) where {D,M}
 end
 
 """
-    smooth_alpha_and_beta_field(P::DomDecPlan, cellsize)
+    smooth_alpha_and_beta_field(P::DomDecPlan, c)
 
 Compute a smooth version of the duals of `P` by performing a 
 Helmholtz decomposition on `X` and adapting the dual in `Y`
@@ -206,14 +206,11 @@ function smooth_alpha_and_beta_fields(P::DomDecPlan{GridMeasure{D}, M}, c) where
         # Weight each entry by its amount of mass, so that conflicting betas
         # can vote
         βJ = get_cell_beta(P, k0, i)
-        # If βJ is broken, we need more data to fix it
-        if length(βJ) != length(I)
-            αJ = get_cell_alpha(P, k0, i)
-            C = get_cell_cost_matrix(P, c, J, I)
-            μJ = view_X_marginal(P, J)
-            ε = P.epsilon
-            fix_beta!(βJ, αJ, C, νJ, νI, μJ, ε)
-        end
+        αJ = get_cell_alpha(P, k0, i)
+        C = get_cell_cost_matrix(P, c, J, I)
+        μJ = view_X_marginal(P, J)
+        ε = P.epsilon
+        fix_beta!(βJ, αJ, C, νJ, νI, μJ, ε)
 
         beta_field[I] .+= (V[i] .+ βJ).* (νJ./νI) 
     end

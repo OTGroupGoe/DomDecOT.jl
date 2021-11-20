@@ -8,10 +8,12 @@ include("iteration.jl")
 
 include("scores.jl")
 
-include("alpha-field.jl")
+include("duals.jl")
 
 include("balance.jl")
 
 include("sinkhorn.jl")
+
+include("multiscale.jl")
 
 end # module
