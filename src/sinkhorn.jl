@@ -1,9 +1,3 @@
-# CODE STATUS: TESTED, REVISED
-# TODO: Lots of code still in .sinkhorn
-using StatsBase: mean
-using SparseArrays
-import MultiScaleOT as MOT
-import MultiScaleOT: sinkhorn!, sinkhorn_stabilized!, log_sinkhorn!
 
 """
     domdec_sinkhorn_stabilized!(β, α, νJ, νI, μJ, C, ε; kwargs...)
@@ -20,7 +14,6 @@ Solve cell problem using the stabilized Sinkhorn algorithm of the
 * C: cost matrix. It is transformed inplace to yield the primal plan 
 * ε: regularization
 """
-    
 function domdec_sinkhorn_stabilized!(β, α, νJ, νI, μJ, C, ε; 
             max_iter = 1000, max_error = 1e-8, 
             max_error_rel=true, verbose = true)
@@ -32,6 +25,7 @@ function domdec_sinkhorn_stabilized!(β, α, νJ, νI, μJ, C, ε;
     return status
 end    
 
+# TODO: this is unstable, so it is not exported. Fix.
 function domdec_sinkhorn_autofix!(β, α, νJ, νI, μJ, C, ε; 
             max_iter = 1000, max_error = 1e-8, 
             max_error_rel=true, verbose = true)
@@ -96,7 +90,22 @@ end
 
 # TODO: provide sparsesinkhorn 
 
-# TODO: document
+
+"""
+    domdec_logsinkhorn!(β, α, νJ, νI, μJ, C, ε; kwargs...)
+
+Solve cell problem using the log-domain Sinkhorn algorithm of the 
+`MultiScaleOT` library. 
+
+# Arguments
+* β: initial Y dual potential
+* α: initial X dual potential
+* νJ: Y cell marginal 
+* νI: global Y marginal supported on the same points as νJ_global
+* μJ: X cell marginal
+* C: cost matrix. It is transformed inplace to yield the primal plan 
+* ε: regularization
+"""
 function domdec_logsinkhorn!(β, α, νJ, νI, μJ, C, ε; 
             max_iter = 1000, max_error = 1e-8, 
             max_error_rel=true, verbose = true)
@@ -111,8 +120,22 @@ function domdec_logsinkhorn!(β, α, νJ, νI, μJ, C, ε;
     return status
 end    
 
-# TODO: document
-function domdec_autofix_log!(β, α, νJ, νI, μJ, C, ε; 
+"""
+    domdec_sinkhorn_autofix_log!(β, α, νJ, νI, μJ, C, ε; kwargs...)
+
+Attempt to solve the cell problem by calling sinkhorn_stabilized!. If
+the algorithm errors, fall back to logsinkhorn!. 
+
+# Arguments
+* β: initial Y dual potential
+* α: initial X dual potential
+* νJ: Y cell marginal 
+* νI: global Y marginal supported on the same points as νJ_global
+* μJ: X cell marginal
+* C: cost matrix. It is transformed inplace to yield the primal plan 
+* ε: regularization
+"""
+function domdec_sinkhorn_autofix_log!(β, α, νJ, νI, μJ, C, ε; 
             max_iter = 1000, max_error = 1e-8, 
             max_error_rel=true, verbose = true)
     # Rename cost to K for code clarity

@@ -4,7 +4,7 @@ import DomDecOT as DD
 import DomDecOT: DomDecPlan
 using LinearAlgebra: norm
 import MultiScaleOT as MOT
-import MultiScaleOT: normalize!
+using MultiScaleOT
 import Random
 
 function product_setup_domdec(N, cellsize)
@@ -245,7 +245,7 @@ end
     @test DD.get_cell_beta(P, 2, 1) == betas[2][1]
 end
 
-@testset ExtendedTestSet "get_cell_cost_matrix" begin
+@testset ExtendedTestSet "get_cost_matrix" begin
     c = MOT.l22
     P = DomDecPlan(product_setup_domdec(4, 1)..., 1)    
     # Whole cost matrix would be
@@ -278,13 +278,13 @@ end
 @testset ExtendedTestSet "get_cell_plan" begin
     # This only works after having performed some iterations
     N = 8
-    cellsize = 2
+    cellsize = 1
     P = DomDecPlan(random_setup_domdec(N, cellsize)..., cellsize) 
 
     J = collect(1:N)
     I = collect(1:N)
     c = MOT.l22
-    C = DD.get_cell_cost_matrix(P, c, J, I)
+    C = DD.get_cost_matrix(P, c, J, I)
     ε = P.epsilon
 
     u = ones(N)
@@ -299,17 +299,24 @@ end
 
     K = v .* K .* u' # Scale it
 
+    # Check PD gap
     α = ε.*log.(u)
     β = ε.*log.(v)
-
+    @test abs(PD_gap_dense(β, α, K, c, I', J', ν, μ, ε) < 1e-8)
+    
+    # Set columns in P to those of k
+    for i in eachindex(P.gamma)
+        P.gamma[i] = sparsevec(K[:,i])
+    end
+    
     for i in eachindex(P.partitions) 
         for j in eachindex(P.partitions[i])
             J = P.partitions[i][j]
-            offset = rand()
+            offset = 0# rand()
             P.alphas[i][j] = α[J] .+ offset
             P.betas[i][j] = β .- offset
-            K2, _ = DD.get_cell_plan(P, c, i, j, false, 0)
-            @test MOT.l1(K2, K[:,J]) < 1e-8
+            K2, I = DD.get_cell_plan(P, c, i, j, false, 0)
+            @test MOT.l1(K2, K[I,J]) < 1e-8
         end
     end
 
@@ -369,7 +376,7 @@ end
     J = collect(1:N)
     I = collect(1:N)
     c = MOT.l22
-    C = DD.get_cell_cost_matrix(P, c, J, I)
+    C = DD.get_cost_matrix(P, c, J, I)
     ε = P.epsilon
 
     u = ones(N)
@@ -415,7 +422,7 @@ end
     J = collect(1:N)
     I = collect(1:N)
     c = MOT.l22
-    C = DD.get_cell_cost_matrix(P0, c, J, I)
+    C = DD.get_cost_matrix(P0, c, J, I)
     ε = P0.epsilon
 
     u = ones(N)

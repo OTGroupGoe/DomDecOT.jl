@@ -90,12 +90,22 @@ end
                 end
 
                 # Last, perform a lot of iterations and check the primal-dual gap
-                params = (; params..., iters = 1:8N)
-                DD.iterate!(P, c, _iterate!, solver, params)
+                params = (; params..., 
+                            iters = 1:8N,
+                            parallel_iteration = false)
+                P1 = deepcopy(P)
+                DD.iterate!(P1, c, solver, params)
 
-                # @show [length.(part) for part in P.partitions]
-                # @show [length.(beta) for beta in P.betas]
-                gap = DD.PD_gap(P, c, ε)
+                gap = DD.PD_gap(P1, c, ε)
+                @test gap < 1e-6
+
+                # Do also for the parallel version
+                params = (; params..., 
+                            parallel_iteration = true)
+                P1 = deepcopy(P)
+                DD.iterate!(P1, c, solver, params)
+
+                gap = DD.PD_gap(P1, c, ε)
                 @test gap < 1e-6
             end
         end

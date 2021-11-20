@@ -1,83 +1,8 @@
-import MultiScaleOT: KL
-import LinearAlgebra: mul!
-
 """
-    fix_beta!(β, N::Int)
+    cell_PD_gap(P, k, j, c, ε)
 
-Check if the Y-dual parameter has the appropriate size. If not, turns it 
-into a zeros(N). 
-Return `true` if β was of the appropriate length, `false` otherwise
+Primal-dual gap in cell j of partition k.
 """
-function fix_beta!(β, N::Int)
-    if length(β) != N
-        β .= 0
-        if length(β) < N
-            sizehint!(β, N)
-            for _ in length(β)+1:N; push!(β, 0); end
-        else
-            for _ in length(β):-1:N+1; pop!(β); end
-        end
-        return false
-    end
-    return true
-end
-
-"""
-    fix_beta!(β, N::Int)
-
-Check if the Y-dual parameter has length `size(C, 1)`. If not, turns it 
-into the dual conjugate of `α` with the appropriate parameters.
-Return `true` if β was of the appropriate length, `false` otherwise
-"""
-function fix_beta!(β, α, C, νJ, νI, μJ, ε)
-    M, N = size(C)
-    was_alright = fix_beta!(β, M)
-    if !was_alright
-        K = get_kernel(C, β, α, νI, μJ, ε)
-        mul!(β, K, ones(N))
-        # Now we do β .= νJ ./ β; β .= ε .* log.(β)
-        # Which can be sumarized as
-        β .= ε .* log.(νJ ./ β)
-        if MOT.isthere_nan_or_inf(β)
-            # Entries of K were too big; do computation in log-domain
-            C2 = copy(C)
-            C2 .-= ε .* log.(μJ')
-            C2 .-= ε .* log.(νI)
-            β .= ε .* log.(νJ) .+ MOT.logsumexp(C2, α, ε, 1)
-        end
-    end
-    return was_alright
-end
-
-# TODO: send all these get_kernel only to MOT
-
-"""
-    get_kernel!(C, a, b, μ, ν, eps)
-
-Compute inplace the Gibbs energy of matrix `C`, current duals `a` and `b` and scale it with marginals `μ`
-and `ν`.
-"""
-function get_kernel!(C, a, b, μ, ν, eps)
-    C .= μ .* exp.((a .+ b' .- C)./eps) .* ν'
-    nothing
-end
-
-get_kernel!(C, a, b, eps) = get_kernel!(C, a, b, 1, 1, eps)
-
-"""
-    get_kernel!(K, μ, ν, eps)
-
-Compute the Gibbs energy of matrix `C`, current duals `a` and `b` and scale it with marginals `μ`
-and `ν`.
-"""
-function get_kernel(C, a, b, μ, ν, eps) 
-    K = copy(C)
-    get_kernel!(K, a, b, μ, ν, eps)
-    return K
-end
-
-get_kernel(C, a, b, eps) = get_kernel(C, a, b, 1, 1, eps)
-
 function cell_PD_gap(P, k, j, c, ε)
     # Check the primal-dual gap on the cell 
     μJ = get_cell_X_marginal(P, k, j)
@@ -89,7 +14,7 @@ function cell_PD_gap(P, k, j, c, ε)
     aJ = get_cell_alpha(P, k, j)
     bJ = get_cell_beta(P, k, j) 
     bJ .+= ε.*(log.(νI) .- log.(νJ))
-    MOT.PD_gap_dense(bJ, aJ, PJ, c, YJ, XJ, νJ, μJ, ε)
+    MultiScaleOT.PD_gap_dense(bJ, aJ, PJ, c, YJ, XJ, νJ, μJ, ε)
 end
 
 """

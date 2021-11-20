@@ -58,6 +58,7 @@ end
 
     c = MOT.l22
     C = [c(x,y) for y in eachcol(X), x in eachcol(Y)]
+    ε = N/10
     K = copy(C)
 
     a = zeros(N)
@@ -66,5 +67,5 @@ end
 
     # scaling used in MOT is different, adjust
     b .+= ε.*log.(ν./νJ) 
-    @test MOT.PD_gap_dense(b, a, K, c, Y, X, νJ, μ, ε)
+    @test abs(MOT.PD_gap_dense(b, a, K, c, Y, X, νJ, μ, ε)<1e-6)
 end

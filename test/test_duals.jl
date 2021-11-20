@@ -64,7 +64,7 @@ end
             J = collect(1:N)
             I = collect(1:N)
             c = MOT.l22
-            C = DD.get_cell_cost_matrix(P0, c, J, I)
+            C = DD.get_cost_matrix(P0, c, J, I)
             ε = N/10
             P0.epsilon = ε
 
@@ -99,4 +99,42 @@ end
             @test MOT.l1(K, K2) < 1e-8
         end
     end
+end
+
+@testset ExtendedTestSet "get_discrete_gradient" begin
+    # In 2D
+    nx, ny = 2, 3
+    truegx = [
+        -1 1 0 0 0 0
+        0 0 -1 1 0 0
+        0 0 0 0 -1 1
+    ]
+    truegy = [
+        -1 0 1 0 0 0
+        0 -1 0 1 0 0
+        0 0 -1 0 1 0
+        0 0 0 -1 0 1
+    ]
+    gxt, gyt = DD.get_discrete_gradient(nx, ny)
+    @test truegx == Array(gxt')
+    @test truegy == Array(gyt')
+
+    # In 3D
+    nz = 2
+    truegx = [
+        truegx              zeros(size(truegx))
+        zeros(size(truegx)) truegx 
+    ]
+    truegy = [
+        truegy              zeros(size(truegy))
+        zeros(size(truegy)) truegy 
+    ]
+
+    D = ones(nx*ny)
+    truegz = spdiagm(nx*ny*(nz-1), nx*ny*nz, 0=>-D, 6=>D)
+
+    gxt, gyt, gzt = DD.get_discrete_gradient(nx, ny, nz)
+    @test truegx == Array(gxt')
+    @test truegy == Array(gyt')
+    @test truegz == Array(gzt')
 end

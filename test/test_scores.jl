@@ -44,6 +44,23 @@ Random.seed!(0)
     @test (β == zeros(5)) & (was_alright == false)
 
     # TODO: test new method
+    M = 32
+    N = 33
+    C = [MOT.l22(i,j) for j in 1.:N, i in 1:M]
+
+    μJ = rand(M) .+ 1e-2; MOT.normalize!(μJ)
+    νJ = rand(N) .+ 1e-2; MOT.normalize!(νJ)
+    νI = rand(N) .+ 1e-2
+    for ε in [1., 0.001]
+        α = zeros(M)
+        β = zeros(N)
+        K = copy(C)
+
+        DD.domdec_logsinkhorn!(β, α, νJ, νI, μJ, K, ε; max_iter = 1, verbose = false)
+        β2 = Float64[]
+        DD.fix_beta!(β2, α, C, νJ, νI, μJ, ε)
+        @test MOT.l1(β, β2) < 1e-8 
+    end
 end
 
 @testset ExtendedTestSet "scores" begin
@@ -58,7 +75,7 @@ end
             J = collect(1:N)
             I = collect(1:N)
             c = MOT.l22
-            C = DD.get_cell_cost_matrix(P0, c, J, I)
+            C = DD.get_cost_matrix(P0, c, J, I)
             ε = N/10
             P0.epsilon = ε
 
