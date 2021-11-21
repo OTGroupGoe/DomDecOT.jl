@@ -30,5 +30,6 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/ismedina/DomDecOT.jl.git"
+    repo = "github.com/ismedina/DomDecOT.jl.git",
+    devbranch = "main"
 )
