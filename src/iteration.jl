@@ -1,15 +1,15 @@
 
 """
-    iterate!(P, c, solver, params)
+    iterate!(P, c, solver, params::NamedTuple)
 
 Perform `params[:iters]` inplace iterations of the domain decomposition algorithm 
 on the plan `P`, using the cost `c` and the inner solver `solver`. 
 If `params[:parallel_iteration]` is true, runs the iterations
 in parallel.
 """
-function iterate!(P, c, solver, params)
-    for k in params[:iters]
-        if params[:parallel_iteration]
+function iterate!(P::DomDecPlan, c, solver, params::NamedTuple)
+    for k in 1:params.iters
+        if params.parallel_iteration
             iterate_parallel!(P, k, c, solver, params)
         else
             iterate_serial!(P, k, c, solver, params)
@@ -21,7 +21,7 @@ end
     iterate_serial!(P, k, c, solver, params)
 
 Run an (inplace), serial half iteration `k` of domain decomposition 
-on plan `P`, with cost `c`, solver `solver` and ceratin `params`.
+on plan `P`, with cost `c`, solver `solver` and ceratain `params`.
 """
 function iterate_serial!(P, k::Int, c, solver, params)
     k = (k-1)%length(P.partitions)+1
@@ -33,10 +33,10 @@ function iterate_serial!(P, k::Int, c, solver, params)
 end
 
 """
-    iterate!(P, k, c, solver, params)
+    iterate_parallel!(P, k, c, solver, params)
 
 Run an (inplace), parallel half iteration `k` of domain decomposition 
-on plan `P`, with cost `c`, solver `solver` and ceratin `params`.
+on plan `P`, with cost `c`, solver `solver` and ceratain `params`.
 """
 function iterate_parallel!(P, k::Int, c, solver, params)
     k = (k-1)%length(P.partitions)+1
