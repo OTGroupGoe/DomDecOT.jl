@@ -1,6 +1,6 @@
 push!(LOAD_PATH,"../")
 
-using Pkg
+using Pkg; Pkg.add("Documenter")
 
 using Documenter, DomDecOT
 
