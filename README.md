@@ -10,17 +10,19 @@ This package is built on top of `MultiScaleOT.jl`, which provides most of the ty
 ```julia-repl
 ] add MultiScaleOT
 ```
-and then 
-```julia-repl
-] add DomDecOT
-```
+to add the `MultiScaleOT.jl` library.
 
 # Examples
 Both Jupyter and Pluto notebooks are available in the `notebooks` and `pluto-notebooks` folder. You can inspect an `.html` generated from these files online. Alternatively, you can run them locally or the cloud.
 
 ## Running the examples locally
 
-Install the packages and as in the section `Installation` and just run them. 
+After installing `MultiScaleOT.jl`, you may need to open Julia and run 
+```julia-repl
+] instantiate
+```
+to get the environment for the package set up (just the first time).
+
 
 ## Run them online
 
