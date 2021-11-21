@@ -81,7 +81,7 @@ dual_score
 PD_gap
 ```
 
-Alternatively, if the global primal and duals are already available in matrix form, one can also use the functions `primal_score_sparse` and `dual_score_sparse` of the `MultiScaleOT.jl` library. [ref]
+Alternatively, if the global primal and duals are already available in matrix form, one can also use the functions [`primal_score_sparse`](https://ismedina.github.io/MultiScaleOT.jl/dev/internals/#MultiScaleOT.primal_score_sparse-NTuple{7,%20Any}) and [`dual_score_sparse`](https://ismedina.github.io/MultiScaleOT.jl/dev/internals/#MultiScaleOT.dual_score_sparse-Tuple{Any,%20Any,%20Any,%20Any,%20Any,%20Any,%20Any,%20Any,%20SparseArrays.SparseMatrixCSC}) of the `MultiScaleOT.jl` library.
 
 ## Refinement
 
