@@ -49,5 +49,5 @@ export refine_plan
 include("display.jl")
 
 # Precompile routines
-include("precompile/precompile.jl")
+# include("precompile/precompile.jl")
 end # module
