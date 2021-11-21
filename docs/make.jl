@@ -1,5 +1,9 @@
 push!(LOAD_PATH,"../")
 
+using Pkg
+
+Pkg.add(url="https://github.com/ismedina/MultiScaleOT.jl")
+
 using Documenter, DomDecOT
 
 makedocs(
