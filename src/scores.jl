@@ -27,6 +27,9 @@ entries of `P`.
 function primal_score(P, c, ε; balancing = false, truncation = 0)
     score = 0.0
     k = P.partk
+    if k == 0
+        k = 1
+    end     
     Part = P.partitions[k]
     for ℓ in eachindex(Part)
         K, I = get_cell_plan(P, c, k, ℓ, balancing, truncation) # TODO: Truncation is repeated
@@ -51,6 +54,9 @@ entries of `P`. For the dense dual score, consider converting first
 """
 function dual_score(P, c, ε; balancing = false, truncation = 0)
     k = P.partk
+    if k == 0
+        k = 1
+    end
     Part = P.partitions[k]
     a, b = smooth_alpha_and_beta_fields(P, c)
     μ = P.mu.weights
@@ -72,10 +78,45 @@ function dual_score(P, c, ε; balancing = false, truncation = 0)
 end
 
 """
-    PD_gap(P, c,  ε)
+    primal_and_dual_score(P, c,  ε)
 
 Primal-dual gap of plan `P` for the cost `c` and regularization `ε`.
 """
+function primal_and_dual_score(P, c, ε; balancing = false, truncation = 0)
+    k = P.partk
+    if k == 0
+        k = 1
+    end
+    Part = P.partitions[k]
+    a, b = smooth_alpha_and_beta_fields(P, c)
+    μ = P.mu.weights
+    ν = P.nu.weights
+    # Dual transport part
+    score_d = dot(a, P.mu.weights) + dot(b, P.nu.weights)
+    score_p = 0.0
+    for ℓ in eachindex(Part)
+        J = Part[ℓ]
+        K, I = get_cell_plan(P, c, k, ℓ, balancing, truncation) # TODO: Truncation is repeated
+        νI = view_Y_marginal(P, I)
+        μJ = view_X_marginal(P, J)
+        C = get_cell_cost_matrix(P, c, k, ℓ, I)
+        # Primal part
+        score_p += dot(K, C) + ε*KL(K, νI .* μJ')
+        # Dual entropic part
+        # Recyle K for computing dual score
+        K .= @views b[I] .+ a[J]' .- C
+        K .= ε.*(1 .- exp.(K./ε)) .* νI .* μJ'
+        score_d += sum(K)
+        # for j in eachindex(J)
+        #     for i in eachindex(I)
+        #         score_d += ε*(1 - exp((a[J[j]]+b[I[i]]-C[i, j])/ε))*μ[J[j]]*ν[I[i]]
+        #     end
+        # end
+    end
+    return score_p, score_d
+end
+
 function PD_gap(P, c, ε)
-    primal_score(P, c, ε) - dual_score(P, c, ε)
+    score_p, score_d = primal_and_dual_score(P, c, ε)
+    score_p - score_d
 end

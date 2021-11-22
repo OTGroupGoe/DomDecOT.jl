@@ -14,6 +14,7 @@ const DEFAULT_PARAMETERS = (;
     balance = true, 
     truncate = true, 
     truncate_Ythresh = 1e-15,
+    truncate_Ythresh_rel = true,
     parallel_iteration = false
 ) 
 

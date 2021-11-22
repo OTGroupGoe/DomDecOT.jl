@@ -91,7 +91,7 @@ mutable struct DomDecPlan{M<:AbstractMeasure, N<:AbstractMeasure} <: AbstractPla
                         alphas::Vector, 
                         betas::Vector, 
                         epsilon=1.0, 
-                        partk=1; 
+                        partk=0; 
                         consistency_check = true) where D
 
         if consistency_check
@@ -119,7 +119,7 @@ end
 function DomDecPlan(mu::AbstractMeasure, nu::AbstractMeasure, gamma,
             cellsize, basic_cells::Vector, 
             composite_cells::Vector, partitions::Vector,
-            epsilon=1.0, partk=1; consistency_check = true) 
+            epsilon=1.0, partk=0; consistency_check = true) 
     
     alphas = [[zeros(length(J)) for J in part] for part in partitions]
     betas = [[Float64[] for _ in part] for part in partitions]
@@ -130,7 +130,9 @@ function DomDecPlan(mu::AbstractMeasure, nu::AbstractMeasure, gamma,
                     epsilon, partk; consistency_check)     
 end
 
-function DomDecPlan(mu::GridMeasure{D}, nu::AbstractMeasure, gamma, cellsize::Int, epsilon::Float64=1.0, partk=1; consistency_check = true) where D
+function DomDecPlan(mu::GridMeasure{D}, nu::AbstractMeasure, gamma, 
+                    cellsize::Int, epsilon::Float64=1.0, partk=0; 
+                    consistency_check = true) where D
     # If mu is a GridMesaure, basic and composite cells are straightforward to Obtain
     # TODO: how to handle CloudMeasure
     basic_cells, composite_cells = get_basic_and_composite_cells(mu.gridshape, cellsize)
@@ -141,11 +143,11 @@ function DomDecPlan(mu::GridMeasure{D}, nu::AbstractMeasure, gamma, cellsize::In
                     epsilon, partk; consistency_check)
 end
 
-function DomDecPlan(mu::CloudMeasure, nu::AbstractMeasure, gamma, cellsize, partk=1, epsilon::Float64=1.0; consistency_check = true) where D
+function DomDecPlan(mu::CloudMeasure, nu::AbstractMeasure, gamma, cellsize, partk=0, epsilon::Float64=1.0; consistency_check = true) where D
     error("not implemented for mu::CloudMeasure (but feel free to open a PR!)")
 end
 
-function DomDecPlan(mu::AbstractMeasure, nu::AbstractMeasure, gamma, cellsize, partk=1, epsilon::Float64=1.0; consistency_check = true) where D
+function DomDecPlan(mu::AbstractMeasure, nu::AbstractMeasure, gamma, cellsize, partk=0, epsilon::Float64=1.0; consistency_check = true) where D
     error("not implemented for mu a general AbstractMeasure")
 end
 
@@ -251,6 +253,9 @@ function get_cell_plan(P, c, k, j, balancing = true, truncation = 1e-14)
     # Get cell paramteres
     μJ = get_cell_X_marginal(P, k, j)
     νJ, I = get_cell_Y_marginal(P, k, j)
+    if k ≤ 0 # no iterations happened, return product plan
+        return νJ.*μJ'./sum(μJ), I
+    end # else:
     νI = view_Y_marginal(P, I)
     α = get_cell_alpha(P, k, j)
     β = get_cell_beta(P, k, j)
@@ -435,24 +440,23 @@ function DomDecPlan(mu::AbstractMeasure{D},
                         alphas::Vector, 
                         betas::Vector, 
                         epsilon=1.0, 
-                        partk=1; 
+                        partk=0; 
                         consistency_check = true) where D
     
     DomDecPlan(mu, nu, reduce_to_cells(A, basic_cells), 
                     cellsize, basic_cells, 
                     composite_cells, partitions,
-                    epsilon; consistency_check)
+                    epsilon, partk; consistency_check)
 end
     
 """
-    plan_to_dense_matrix(P, c[, k, balancing = true])
+    plan_to_dense_matrix(P, c[, balancing = true])
 
-Turn P into a dense matrix using the dual potentials of partition `k`.
+Turn P into a dense matrix using the dual potentials of the last iteration.
 """
-function plan_to_dense_matrix(P, c, k=-1, balancing = true)
-    if k ≤ 0
-        k = P.partk
-    end
+function plan_to_dense_matrix(P, c, balancing = true)
+    k = P.partk
+    if k == 0; k = 1; end
     k = (k-1)%length(P.partitions)+1
     Part = P.partitions[k]
     A = zeros(npoints(P.nu), npoints(P.mu))
@@ -472,6 +476,7 @@ Turn P into a sparse matrix using the dual in the last iteration.
 function plan_to_sparse_matrix(P, c, balancing = true, truncate_Ythresh = 0)
     # This follows very closely MultiScaleOT.refine_support
     k = P.partk
+    if k == 0; k = 1; end
     Part = P.partitions[k]
     N = npoints(P.nu)
     M = npoints(P.mu)

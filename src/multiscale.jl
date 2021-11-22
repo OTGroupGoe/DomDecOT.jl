@@ -43,7 +43,7 @@ function refine_plan(P::DomDecPlan,
                      μH::MultiScaleMeasure{GridMeasure{D}}, 
                      νH::MultiScaleMeasure, 
                      k::Int;
-                     consistency_check = true) where D
+                     consistency_check = false) where D
 
     # Get new marginals and rest of data
     new_mu = μH[k]

@@ -321,9 +321,11 @@ end
     end
 
     # Get global plan
-    K2 = DD.plan_to_dense_matrix(P, c, 1, false)
+    P.partk = 1
+    K2 = DD.plan_to_dense_matrix(P, c, false)
     @test MOT.l1(K2, K) < 1e-8
-    K2 = DD.plan_to_dense_matrix(P, c, 2, false)
+    P.partk = 2
+    K2 = DD.plan_to_dense_matrix(P, c, false)
     @test MOT.l1(K2, K) < 1e-8
     # TODO: still should test these functions after real domdec iterations
 end
@@ -449,10 +451,12 @@ end
         end
     end
     # Check that the plan can be converted back to a matrix
-    K2 = DD.plan_to_dense_matrix(P, c, 1, false)
+    P.partk = 1
+    K2 = DD.plan_to_dense_matrix(P, c, false)
     @test MOT.l1(K, K2) < 1e-8
     # Using both partitions
-    K2 = DD.plan_to_dense_matrix(P, c, 2, false)
+    P.partk = 2
+    K2 = DD.plan_to_dense_matrix(P, c, false)
     @test MOT.l1(K, K2) < 1e-8
 
     # And also using the SparseMatrix method
