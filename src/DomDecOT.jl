@@ -48,6 +48,10 @@ export refine_plan
 
 include("display.jl")
 
+include("parameters.jl")
+export default_domdec_eps_schedule, 
+    make_domdec_schedule
+
 # Precompile routines
 # include("precompile/precompile.jl")
 end # module

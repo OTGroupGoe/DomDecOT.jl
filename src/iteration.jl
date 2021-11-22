@@ -8,7 +8,7 @@ If `params[:parallel_iteration]` is true, runs the iterations
 in parallel.
 """
 function iterate!(P::DomDecPlan, c, solver, params::NamedTuple)
-    for k in 1:params.iters
+    for k in 1:params.domdec_iters
         if params.parallel_iteration
             iterate_parallel!(P, k, c, solver, params)
         else

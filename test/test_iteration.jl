@@ -91,7 +91,7 @@ end
 
                 # Last, perform a lot of iterations and check the primal-dual gap
                 params = (; params..., 
-                            iters = 8N,
+                            domdec_iters = 8N,
                             parallel_iteration = false)
                 P1 = deepcopy(P)
                 DD.iterate!(P1, c, solver, params)
