@@ -8,11 +8,11 @@ For documentation see https://ismedina.github.io/DomDecOT.jl/dev/.
 
 This package is built on top of `MultiScaleOT.jl`, which provides most of the type interface and Sinkhorn solvers. You will need to run: 
 ```julia-repl
-] add MultiScaleOT
+] add https://github.com/ismedina/MultiScaleOT.jl
 ```
 to add the `MultiScaleOT.jl` library, and then 
 ```julia-repl
-] add DomDecOT
+] add https://github.com/ismedina/DomDecOT.jl
 ```
 to use this one. 
 
@@ -23,9 +23,9 @@ Both Jupyter and Pluto notebooks are available in the `notebooks` and `pluto-not
 
 Open Julia in the notebooks folder and run 
 ```julia-repl
-] instantiate
+import Pkg; Pkg.activate("."); Pkg.instantiate("")
 ```
-to get the environment for the package set up (just the first time). With this the notebooks should download and install the `MultiScaleOT` and `DomDecOT` libraries.
+to get the environment for the package set up (just the first time). This will also download and install the `MultiScaleOT` and `DomDecOT` libraries.
 
 
 ## Run them online

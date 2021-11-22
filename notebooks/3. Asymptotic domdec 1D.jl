@@ -8,7 +8,6 @@ using Plots
 default(size = (300, 300), legend = :none, aspect_ratio = :equal, ticks = false, showaxis = false)
 import LinearAlgebra: dot, ⋅, norm
 using SparseArrays
-using PlutoUI
 
 # +
 function get_initial_plan_and_tfinal(key, N)
