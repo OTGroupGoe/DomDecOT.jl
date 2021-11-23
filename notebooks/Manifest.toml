@@ -5,11 +5,6 @@ git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
 uuid = "a4c015fc-c6ff-483c-b24f-f7ea428134e9"
 version = "0.0.1"
 
-[[AbstractTrees]]
-git-tree-sha1 = "03e0550477d86222521d254b741d470ba17ea0b5"
-uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
-version = "0.3.4"
-
 [[Adapt]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "84918055d15b3114ede17ac6a7182f68870c16f7"
@@ -158,15 +153,11 @@ git-tree-sha1 = "f425293f7e0acaf9144de6d731772de156676233"
 uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 version = "0.27.10"
 
-[[DocumenterTools]]
-deps = ["AbstractTrees", "Base64", "DocStringExtensions", "Documenter", "FileWatching", "Gumbo", "LibGit2", "Sass"]
-git-tree-sha1 = "d0574a2a4950fdcde104b7f3d1b34f0417fa9f10"
-uuid = "35a29f4d-8980-5a13-9543-d66fff28ecb8"
-version = "0.1.13"
-
 [[DomDecOT]]
-deps = ["Documenter", "DocumenterTools", "LinearAlgebra", "MultiScaleOT", "Random", "SparseArrays", "StatsBase", "Test", "TestSetExtensions"]
-path = ".."
+deps = ["Documenter", "LinearAlgebra", "MultiScaleOT", "Random", "SparseArrays", "StatsBase", "Test", "TestSetExtensions"]
+git-tree-sha1 = "b37b4f000fd59de5d018c7be05ec695e566d4487"
+repo-rev = "main"
+repo-url = ".."
 uuid = "de904e9b-d3c6-49b5-88eb-93a408363a9e"
 version = "0.1.0"
 
@@ -197,15 +188,6 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
-
-[[FileIO]]
-deps = ["Pkg", "Requires", "UUIDs"]
-git-tree-sha1 = "2db648b6712831ecb333eae76dbfd1c156ca13bb"
-uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.11.2"
-
-[[FileWatching]]
-uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -284,18 +266,6 @@ git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
 
-[[Gumbo]]
-deps = ["AbstractTrees", "Gumbo_jll", "Libdl"]
-git-tree-sha1 = "e711d08d896018037d6ff0ad4ebe675ca67119d4"
-uuid = "708ec375-b3d6-5a57-a7ce-8257bf98657a"
-version = "0.8.0"
-
-[[Gumbo_jll]]
-deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "86111f5523d7c42da0edd85ef7999c663881ac1e"
-uuid = "528830af-5a63-567c-a44a-034ed33b8444"
-version = "0.10.1+1"
-
 [[HDF5]]
 deps = ["Blosc", "Compat", "HDF5_jll", "Libdl", "Mmap", "Random", "Requires"]
 git-tree-sha1 = "698c099c6613d7b7f151832868728f426abe698b"
@@ -362,12 +332,6 @@ version = "1.3.0"
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
-
-[[JLD]]
-deps = ["FileIO", "HDF5", "Printf"]
-git-tree-sha1 = "1d291ba1730de859903b480e6f85a0dc40c19dcb"
-uuid = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
-version = "0.12.3"
 
 [[JLLWrappers]]
 deps = ["Preferences"]
@@ -541,7 +505,7 @@ uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
 
 [[MultiScaleOT]]
 deps = ["Interpolations", "LinearAlgebra", "Random", "SparseArrays", "StructArrays", "Test", "TestSetExtensions"]
-git-tree-sha1 = "f8c1b7956b86bb99d24b81c963e480f0456d836d"
+git-tree-sha1 = "c5f7cb40ab96283a0b36d1bba54fd5d3e46f8d26"
 repo-rev = "main"
 repo-url = "https://github.com/ismedina/MultiScaleOT.jl"
 uuid = "c179b4a2-6728-4c13-8bc6-7520bf7f8b95"
@@ -655,9 +619,9 @@ uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
 version = "0.4.2"
 
 [[RecipesBase]]
-git-tree-sha1 = "44a75aa7a527910ee3d1751d1f0e4148698add9e"
+git-tree-sha1 = "a4425fe1cde746e278fa895cc69e3113cb2614f6"
 uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "1.1.2"
+version = "1.2.0"
 
 [[RecipesPipeline]]
 deps = ["Dates", "NaNMath", "PlotUtils", "RecipesBase"]
@@ -678,12 +642,6 @@ version = "1.1.3"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
-
-[[Sass]]
-deps = ["libsass_jll"]
-git-tree-sha1 = "aa841c3738cec78b5dbccd56dda332710f35f6a5"
-uuid = "322a6be2-4ae8-5d68-aaf1-3e960788d1d9"
-version = "0.2.0"
 
 [[Scratch]]
 deps = ["Dates"]
@@ -734,9 +692,9 @@ version = "1.1.0"
 
 [[StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "eb35dcc66558b2dda84079b9a1be17557d32091a"
+git-tree-sha1 = "2bb0cb32026a66037360606510fca5984ccc6b75"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.33.12"
+version = "0.33.13"
 
 [[StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
@@ -981,12 +939,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
 git-tree-sha1 = "94d180a6d2b5e55e447e2d27a29ed04fe79eb30c"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
 version = "1.6.38+0"
-
-[[libsass_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "663428b7ebaf60c60ee147f0f9466430e9959ad6"
-uuid = "47bcb7c8-5119-555a-9eeb-0afcc36cd728"
-version = "3.5.5+0"
 
 [[libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
