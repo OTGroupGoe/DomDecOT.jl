@@ -253,7 +253,7 @@ function get_cell_plan(P, c, k, j, balancing = true, truncation = 1e-14)
     # Get cell paramteres
     μJ = get_cell_X_marginal(P, k, j)
     νJ, I = get_cell_Y_marginal(P, k, j)
-    if k ≤ 0 # no iterations happened, return product plan
+    if P.partk ≤ 0 # no iterations happened, return product plan
         return νJ.*μJ'./sum(μJ), I
     end # else:
     νI = view_Y_marginal(P, I)

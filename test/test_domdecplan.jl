@@ -310,6 +310,7 @@ end
     end
     
     for i in eachindex(P.partitions) 
+        P.partk = i
         for j in eachindex(P.partitions[i])
             J = P.partitions[i][j]
             offset = 0# rand()
@@ -397,6 +398,7 @@ end
     β = ε.*log.(v)
 
     for i in eachindex(P.partitions) 
+        P.partk = i
         for j in eachindex(P.partitions[i])
             J = P.partitions[i][j]
             P.alphas[i][j] = α[J]

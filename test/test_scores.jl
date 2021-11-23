@@ -105,7 +105,7 @@ end
                     P.betas[i][j] = β[I] .- offset
                 end
             end
-
+            P.partk = 1
             # Check that the scores give the same result 
             # for K and P
             p_score_1 = MOT.primal_score_dense(K, c, Y, X, ν, μ, ε)

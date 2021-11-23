@@ -46,6 +46,7 @@ Random.seed!(0)
             
             k = 1
             j = 1
+            P.partk = k
             DD.solvecell!(P, k, j, c, solver, params)
 
             # Check the primal-dual gap on the cell 
