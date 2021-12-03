@@ -69,7 +69,12 @@ function solvecell!(P::DomDecPlan, k, j, c, solver, params)
     # β can have the wrong size after initialization or 
     # an alternated iteration. So we must be sure that 
     # it has the correct length:
-    fix_beta!(β, α, K, νJ, νI, μJ, ε) 
+    #fix_beta!(β, α, K, νJ, νI, μJ, ε) 
+    # The version above was very inefficient; this one runs much faster
+    fix_beta!(β, length(I))
+    for i in eachindex(I) # TODO: wrap into function, make more efficient
+        @inbounds β[i] = sum(K[i,ℓ] - α[ℓ] for ℓ in eachindex(J))/length(J)
+    end
     # Solve the cell subproblem
     status = solver(β, α, νJ, νI, μJ, K, ε;
                     max_iter = params[:solver_max_iter],
