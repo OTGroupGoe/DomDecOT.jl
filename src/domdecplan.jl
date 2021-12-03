@@ -186,7 +186,7 @@ function get_cell_Y_marginal(P::DomDecPlan, J)
     # TODO, MEDIUM, PERFORMANCE
     # Check if this is performant enough
     νJ = sum(P.gamma[J])
-    return νJ.nzval, νJ.nzind
+    return νJ.nzval, copy(νJ.nzind)
 end
 
 get_cell_Y_marginal(P::DomDecPlan, k, j) = get_cell_Y_marginal(P, P.composite_cells[k][j])
@@ -291,8 +291,12 @@ function reduce_cellplan_to_cellmarginals(P::DomDecPlan, PJ::AbstractMatrix, k, 
     ptr = 0
     for i in eachindex(J)
         cellsize = length(P.basic_cells[J[i]])
+        # To be completely sure that the inbounds below don't run into problems:
+        ptr+cellsize>size(PJ,2) && error("cell plan does not agree with basic cellsizes")
         for m in 1:cellsize
-            Pis[:, i] .+= @views PJ[:,ptr+m]
+            @simd for j in 1:size(Pis, 1)
+                @inbounds Pis[j, i] += PJ[j,ptr+m]
+            end
         end
         mJ[i] = sum(@views μJ[ptr+1:ptr+cellsize])
         ptr += cellsize
@@ -380,14 +384,31 @@ Update cell `j` of partition `k` of the plan `P` using the columns
 in `P_basic` as the basic cell marginals. `I` is the real support of
 the columns of P_basic
 """
+# function update_cell_plan!(P::DomDecPlan, P_basic, k, j, I)
+#     basic_cells = P.composite_cells[k][j]
+#     println(I)
+#     for i in eachindex(basic_cells)
+#         # Construct sparse vectors only with the positive entries
+#         Ip = findall(>(0), @views P_basic[:,i])
+#         P.gamma[basic_cells[i]] = sparsevec(I[Ip], P_basic[Ip,i], npoints(P.nu))
+#     end
+# end
+# Second version, reusing basic cell marginals sparsevector
 function update_cell_plan!(P::DomDecPlan, P_basic, k, j, I)
     basic_cells = P.composite_cells[k][j]
     for i in eachindex(basic_cells)
-        # Construct sparse vectors only with the positive entries
-        Ip = findall(>(0), @views P_basic[:,i])
-        P.gamma[basic_cells[i]] = sparsevec(I[Ip], P_basic[Ip,i], npoints(P.nu))
+        νi = P.gamma[basic_cells[i]]
+        empty!(νi.nzval)
+        empty!(νi.nzind)
+        for j in 1:size(P_basic,1)
+            if P_basic[j,i] > 0
+                push!(νi.nzind, I[j])
+                push!(νi.nzval, P_basic[j,i])
+            end
+        end
     end
 end
+
 
 #######################################################
 # Utils for transforming a plan to dense/sparse matrices
