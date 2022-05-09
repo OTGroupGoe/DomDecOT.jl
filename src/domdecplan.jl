@@ -416,7 +416,7 @@ end
 #######################################################
 
 """
-    reduce_to_cellsize(γ0::AbstractVector, basic_cells)
+    reduce_to_cells(γ0::AbstractVector, basic_cells)
 
 Add together marginals corresponding to the same basic cell.
 """
@@ -426,7 +426,7 @@ function reduce_to_cells(γ0::AbstractVector{AbstractVector}, basic_cells)
 end
 
 """
-    reduce_to_cellsize(γ0::AbstractMatrix, basic_cells)
+    reduce_to_cells(γ0::AbstractMatrix, basic_cells)
 
 Add together marginals corresponding to the same basic cell.
 """
@@ -448,7 +448,7 @@ for given `shapeX` and `cellSize`.
 """
 function reduce_to_cells(gamma, gridshape, cellsize)
     basic_cells, _ = get_cells(gridshape, cellsize)
-    reduce_to_cellsize(gamma, basic_cells)
+    reduce_to_cells(gamma, basic_cells)
 end
 
 function DomDecPlan(mu::AbstractMeasure{D}, 
@@ -499,10 +499,10 @@ function plan_to_sparse_matrix(P, c, balancing = true, truncate_Ythresh = 0)
     k = P.partk
     if k == 0; k = 1; end
     Part = P.partitions[k]
-    N = npoints(P.nu)
     M = npoints(P.mu)
-    nzval_scattered = Vector{Vector{Float64}}(undef, N)
-    rowval_scattered = Vector{Vector{Int}}(undef, N) # Entry `i` is the support of column `i`
+    N = npoints(P.nu)
+    nzval_scattered = Vector{Vector{Float64}}(undef, M)
+    rowval_scattered = Vector{Vector{Int}}(undef, M) # Entry `i` is the support of column `i`
     colptr = Vector{Int}(undef, N+1) # Entry `i+1` is the length of col `i`; a cumsum then yields the correct colptr.
     colptr[1] = 1
     for ℓ in eachindex(Part)
