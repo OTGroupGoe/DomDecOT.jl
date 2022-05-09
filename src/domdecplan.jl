@@ -503,7 +503,7 @@ function plan_to_sparse_matrix(P, c, balancing = true, truncate_Ythresh = 0)
     N = npoints(P.nu)
     nzval_scattered = Vector{Vector{Float64}}(undef, M)
     rowval_scattered = Vector{Vector{Int}}(undef, M) # Entry `i` is the support of column `i`
-    colptr = Vector{Int}(undef, N+1) # Entry `i+1` is the length of col `i`; a cumsum then yields the correct colptr.
+    colptr = Vector{Int}(undef, M+1) # Entry `i+1` is the length of col `i`; a cumsum then yields the correct colptr.
     colptr[1] = 1
     for ℓ in eachindex(Part)
         K, I = get_cell_plan(P, c, k, ℓ, balancing, truncate_Ythresh) # TODO: Truncation is repeated

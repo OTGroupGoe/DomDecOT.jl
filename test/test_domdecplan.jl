@@ -23,20 +23,28 @@ function product_setup_domdec(N, cellsize)
     return mu, nu, gamma
 end
 
-function random_setup_domdec(N, cellsize)
-    x1 = collect(1:N)
+
+function random_setup_domdec(M, N, cellsize)
+    x1 = collect(1:M)
     X = MOT.flat_grid(x1)
-    Y = MOT.flat_grid(x1)
-    μ = rand(N) .+ 1e-2; normalize!(μ)
+    x2 = collect(1:N)
+    Y = MOT.flat_grid(x2)
+
+    μ = rand(M) .+ 1e-2; normalize!(μ)
     ν = rand(N) .+ 1e-2; normalize!(ν)
 
-    mu = MOT.GridMeasure(X, μ, (N,))
+    mu = MOT.GridMeasure(X, μ, (M,))
     nu = MOT.GridMeasure(Y, ν, (N,))
-
+    
     gamma0 = ν .* μ'
-    basic_cells, _ = DD.get_cells((N,), cellsize)
+    basic_cells, _ = DD.get_cells((M,), cellsize)
     gamma = [sparse(sum(gamma0[:,J], dims = 2)[:]) for J in basic_cells] # Only basic cell marginals remain
     return mu, nu, gamma
+end
+
+
+function random_setup_domdec(N, cellsize)
+    random_setup_domdec(N, N, cellsize)
 end
 
 function identity_setup_domdec(N, cellsize)
@@ -418,18 +426,19 @@ end
 
 @testset ExtendedTestSet "matrix-to-domdecplan" begin
     # This only works after having performed some iterations
-    N = 8
+    # Set \mu and \nu of different size to be safe
+    M, N = 8, 9
     cellsize = 2
-    mu, nu, gamma = random_setup_domdec(N, cellsize)
+    mu, nu, gamma = random_setup_domdec(M, N, cellsize)
     P0 = DomDecPlan(mu, nu, gamma, cellsize) 
 
-    J = collect(1:N)
+    J = collect(1:M)
     I = collect(1:N)
     c = MOT.l22
     C = DD.get_cost_matrix(P0, c, J, I)
     ε = P0.epsilon
 
-    u = ones(N)
+    u = ones(M)
     v = ones(N)
     μ = mu.weights
     ν = nu.weights

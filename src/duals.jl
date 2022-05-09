@@ -147,7 +147,7 @@ end
 
 Glue cell duals of partition `k` to form a global dual.
 """
-function get_alpha_field(P::DomDecPlan{GridMeasure{D},M}, k) where {D,M}
+function get_alpha_field(P::DomDecPlan, k) where {D,M}
     A = zeros(P.mu.gridshape) 
     for (i,J) in enumerate(P.partitions[k])
         A[J] = P.alphas[k][i]
