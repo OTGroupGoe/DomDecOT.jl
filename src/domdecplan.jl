@@ -137,6 +137,15 @@ function DomDecPlan(mu::GridMeasure{D}, nu::AbstractMeasure, gamma,
     # TODO: how to handle CloudMeasure
     basic_cells, composite_cells = get_basic_and_composite_cells(mu.gridshape, cellsize)
     partitions = [get_partition(basic_cells, comp) for comp in composite_cells]
+    if length(gamma) == length(mu.weights)
+        # Then gamma must be reduced to cellsizes 
+        gamma = reduce_to_cells(gamma, basic_cells)
+    elseif length(gamma) == length(basic_cells)
+        # Then it is already reduced
+        nothing
+    else
+        error("gamma cannot be matched to cells")
+    end
     return DomDecPlan(mu, nu, gamma, 
                     cellsize, basic_cells, 
                     composite_cells, partitions,
