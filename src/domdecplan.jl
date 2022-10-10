@@ -427,9 +427,10 @@ end
 """
     reduce_to_cells(γ0::AbstractVector, basic_cells)
 
-Add together marginals corresponding to the same basic cell.
+Add together marginals corresponding to the same basic cell, when γ0 is
+passed as a vector of (sparse) cell marginals
 """
-function reduce_to_cells(γ0::AbstractVector{AbstractVector}, basic_cells)
+function reduce_to_cells(γ0::Vector{SparseVector{Float64, Int64}}, basic_cells)
     gamma = [sum(@views γ0[cell]) for cell in basic_cells]
     return gamma
 end
@@ -437,7 +438,8 @@ end
 """
     reduce_to_cells(γ0::AbstractMatrix, basic_cells)
 
-Add together marginals corresponding to the same basic cell.
+Add together marginals corresponding to the same basic cell, when γ0 is
+passed as a dense or sparse matrix.
 """
 function reduce_to_cells(K::AbstractMatrix, basic_cells)
     gamma = Vector{SparseVector{Float64, Int}}(undef, length(basic_cells))
@@ -450,10 +452,10 @@ end
 
 # TODO: Test this in iterate, solving with sinkhorn and with domdec
 """
-    reduce_to_cells(gamma, gridshape, cellSize)
+    reduce_to_cells(gamma, gridshape, cellsize)
 
 Add together marginals corresponding to the same basic cell, 
-for given `shapeX` and `cellSize`.
+for given `shapeX` and `cellsize`.
 """
 function reduce_to_cells(gamma, gridshape, cellsize)
     basic_cells, _ = get_cells(gridshape, cellsize)
